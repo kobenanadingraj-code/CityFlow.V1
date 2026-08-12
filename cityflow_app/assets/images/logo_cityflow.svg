@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="cityflowGradient" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#22C55E"/>
+    </linearGradient>
+  </defs>
+  <circle cx="100" cy="100" r="100" fill="url(#cityflowGradient)"/>
+  <path
+    fill="#FFFFFF"
+    d="M100 46c-20.988 0-38 17.012-38 38 0 28.5 38 70 38 70s38-41.5 38-70c0-20.988-17.012-38-38-38zm0 51.667c-7.548 0-13.667-6.119-13.667-13.667S92.452 70.333 100 70.333 113.667 76.452 113.667 84 107.548 97.667 100 97.667z"
+  />
+</svg>

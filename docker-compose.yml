@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: cityflow_db
+      POSTGRES_USER: cityflow
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-cityflow123}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cityflow -d cityflow_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Moteur de routing pour l'écran Trajet (durée/distance réelles).
+  # Le graphe (*.osrm*) doit être préparé au préalable avec
+  # scripts/prepare_osrm_data.sh — voir ce script pour le détail.
+  # Sans ce préchargement, ce service refusera de démarrer (fichier .osrm absent).
+  osrm:
+    image: ghcr.io/project-osrm/osrm-backend:latest
+    volumes:
+      - ./osrm_data:/data
+    ports:
+      - "5001:5000"
+    command: osrm-routed --algorithm mld /data/abidjan.osrm
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: cityflow_backend/Dockerfile
+    working_dir: /app
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://cityflow:${DB_PASSWORD:-cityflow123}@db:5432/cityflow_db
+      OSRM_URL: http://osrm:5000
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      osrm:
+        condition: service_started
+    command: >
+      sh -c "python manage.py migrate &&
+             gunicorn cityflow_backend.wsgi:application
+             --bind 0.0.0.0:8000 --workers 2 --timeout 60"
+
+volumes:
+  postgres_data:

@@ -1,0 +1,58 @@
+# ==============================
+# Python
+# ==============================
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# ==============================
+# Environment variables / secrets
+# ==============================
+.env
+.env.*
+!.env.example
+
+# ==============================
+# Django
+# ==============================
+*.sqlite3
+db.sqlite3
+media/
+staticfiles/
+
+# ==============================
+# Flutter / Dart
+# ==============================
+cityflow_app/.dart_tool/
+cityflow_app/.flutter-plugins
+cityflow_app/.flutter-plugins-dependencies
+cityflow_app/.packages
+cityflow_app/build/
+cityflow_app/.idea/
+cityflow_app/.vscode/
+cityflow_app/*.iml
+
+# ==============================
+# Android
+# ==============================
+cityflow_app/android/.gradle/
+cityflow_app/android/local.properties
+cityflow_app/android/**/build/
+
+# ==============================
+# iOS
+# ==============================
+cityflow_app/ios/Pods/
+cityflow_app/ios/.symlinks/
+cityflow_app/ios/Flutter/ephemeral/
+
+# ==============================
+# General
+# ==============================
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
