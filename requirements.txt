@@ -10,3 +10,4 @@ Pillow
 requests
 openpyxl
 reportlab
+gunicorn
