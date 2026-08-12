@@ -12,12 +12,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY requirements.txt .
 
-RUN pip install --no-cache-dir -r requirements.txt gunicorn
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Copier le backend Django
 COPY cityflow_backend/ .
 
-# Copier les données nécessaires au seeding
 COPY data/ /app/data/
 
 RUN python manage.py collectstatic --noinput || true
