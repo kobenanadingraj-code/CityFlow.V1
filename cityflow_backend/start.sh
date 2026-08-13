@@ -20,7 +20,7 @@ done
 
 SEGMENTS=$(python manage.py shell -c \
 "from mobility.models import RoadSegment; print(RoadSegment.objects.count())" \
-2>/dev/null) || SEGMENTS=""
+2>/dev/null | tail -n 1) || SEGMENTS="0"
 
 if [ "$SEGMENTS" = "0" ]; then
     echo "[CityFlow] Premiere installation - chargement des donnees demo..."
