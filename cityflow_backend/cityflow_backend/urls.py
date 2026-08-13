@@ -63,8 +63,8 @@ def seed(request):
                              'predictions': Prediction.objects.count()})
 
     base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    geojson = '/app/docs/data/grand_abidjan.geojson'
-    meteo = '/app/docs/data/meteo_abidjan.json'
+    geojson = '/app/data/grand_abidjan.geojson'
+    meteo = '/app/data/meteo_abidjan.json'
     log = []
 
     # 1. Comptes (admin + citoyens) — nécessaires pour seed_demo_reports
