@@ -18,8 +18,6 @@ COPY cityflow_backend/ .
 
 COPY data/ /app/data/
 
-RUN python manage.py collectstatic --noinput || true
-
 RUN chmod +x /app/start.sh
 
 EXPOSE 8000
