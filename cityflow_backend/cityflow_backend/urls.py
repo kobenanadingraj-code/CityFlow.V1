@@ -63,8 +63,8 @@ def seed(request):
                              'predictions': Prediction.objects.count()})
 
     base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    geojson = '/app/data/grand_abidjan.geojson'
-    meteo = '/app/data/meteo_abidjan.json'
+    geojson = '/app/docs/data/grand_abidjan.geojson'
+    meteo = '/app/docs/data/meteo_abidjan.json'
     log = []
 
     # 1. Comptes (admin + citoyens) — nécessaires pour seed_demo_reports
@@ -200,6 +200,33 @@ def fix_zones(request):
         return JsonResponse({'status': 'error', 'detail': str(e)}, status=500)
 
 
+@csrf_exempt
+def recompute_snapshot(request):
+    """
+    Capture le DailySnapshot du jour (compteurs KPI du Tableau de bord),
+    nécessaire pour que /api/dashboard/stats/ calcule les '+X% vs hier'.
+    À appeler une fois par jour (pas de cron sur le tier gratuit Render —
+    déclenchement manuel via cet endpoint). Synchrone (~5 s). Protégé SEED_TOKEN.
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST requis'}, status=405)
+    if not _SEED_TOKEN or request.headers.get('X-Seed-Token') != _SEED_TOKEN:
+        return JsonResponse({'error': 'Token invalide'}, status=403)
+    base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    try:
+        result = subprocess.run(
+            ['python', 'manage.py', 'recompute_daily_snapshot'],
+            capture_output=True, text=True, cwd=base, timeout=60,
+        )
+        return JsonResponse({
+            'status': 'ok' if result.returncode == 0 else 'error',
+            'stdout': result.stdout[-2000:],
+            'stderr': result.stderr[-300:],
+        }, status=200 if result.returncode == 0 else 500)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'detail': str(e)}, status=500)
+
+
 urlpatterns = [
     path('health/', health),
     path('seed/', seed),
@@ -207,6 +234,7 @@ urlpatterns = [
     path('recompute/', recompute),
     path('seed-and-recompute/', seed_and_recompute),
     path('fix-zones/', fix_zones),
+    path('recompute-snapshot/', recompute_snapshot),
     path('admin/', admin.site.urls),
     path('api/auth/', include('accounts.urls')),
     path('api/', include('mobility.urls')),

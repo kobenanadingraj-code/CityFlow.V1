@@ -22,21 +22,7 @@ import os
 from django.core.management.base import BaseCommand, CommandError
 
 from mobility.models import RoadSegment
-
-ZONES_INONDABLES = {'yopougon', 'abobo', 'attécoubé', 'attecoube', 'nord'}
-
-
-def _zone_from_feature(props):
-    for key in ('addr:city', 'is_in:city', 'addr:suburb'):
-        val = props.get(key, '')
-        if val:
-            return val
-    return 'Abidjan'
-
-
-def _is_inondable(zone: str) -> bool:
-    z = zone.lower()
-    return any(zi in z for zi in ZONES_INONDABLES)
+from mobility.geo_zones import classify_commune, is_inondable
 
 
 class Command(BaseCommand):
@@ -74,9 +60,6 @@ class Command(BaseCommand):
             geom = feat.get('geometry', {})
 
             nom = props.get('name') or props.get('ref', '')
-            zone = _zone_from_feature(props)
-            if not nom:
-                nom = f"Route sans nom - {zone}"
 
             coords = None
             if geom.get('type') == 'LineString' and geom.get('coordinates'):
@@ -90,7 +73,10 @@ class Command(BaseCommand):
                 continue
 
             lon, lat = (coords[0], coords[1]) if len(coords) >= 2 else (0.0, 0.0)
-            inondable = _is_inondable(zone)
+            zone = classify_commune(nom, lat, lon)
+            if not nom:
+                nom = f"Route sans nom - {zone}"
+            inondable = is_inondable(zone)
             zone_counts[zone] = zone_counts.get(zone, 0) + 1
             if inondable:
                 inondable_count += 1

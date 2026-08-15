@@ -12,11 +12,12 @@ from .models import RoadSegment, TrafficRecord, Prediction
 from .serializers import RoadSegmentSerializer, TrafficRecordSerializer, PredictionSerializer
 from .throttles import PredictionsReadThrottle
 from .aggregation import heures_de_pointe_globales, zones_a_risque
+from .geo_zones import COMMUNE_CENTERS
 
-_KNOWN_COMMUNES = [
-    'Abidjan', 'Abobo', 'Yopougon', 'Bingerville', 'Treichville',
-    'Port-Bouët', 'Koumassi', 'Songon', 'Adjamé',
-]
+# Dérivée de geo_zones.py (source unique de vérité pour les communes) — évite
+# la désynchronisation qui excluait silencieusement Cocody/Marcory/Plateau/
+# Attécoubé des résultats de /api/predictions/ et /api/communes/.
+_KNOWN_COMMUNES = list(COMMUNE_CENTERS.keys()) + ['Abidjan']
 
 
 class PredictionPagination(LimitOffsetPagination):
